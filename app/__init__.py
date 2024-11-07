@@ -2,12 +2,20 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def index():
     return render_template('index.html')
 
+
+@app.route('/login')
+def login():
+    return render_template('auth/login.html')
+
+
 def not_found(error):
     return render_template('errors/404.html'), 404
+
 
 def init_app(config):
     app.config.from_object(config)
