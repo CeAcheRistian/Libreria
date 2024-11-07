@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "Hello World!"
+    return render_template('index.html')
 
 def not_found(error):
     return render_template('errors/404.html'), 404
