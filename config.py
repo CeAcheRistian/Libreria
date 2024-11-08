@@ -1,5 +1,7 @@
+from local_settings import SECRET_PASSWORD
+
 class Config:
-    pass
+    SECRET_PASSWORD = SECRET_PASSWORD
 
 class DevelopmentConfig(Config):
     DEGUG = True
