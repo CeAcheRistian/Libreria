@@ -2,9 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for
 
 from flask_wtf.csrf import CSRFProtect
 
+from flask_sqlalchemy import SQLAlchemy
+
+
 app = Flask(__name__)
 
 csrf = CSRFProtect()
+
+db = SQLAlchemy()
 
 
 @app.route("/")
@@ -32,4 +37,6 @@ def init_app(config):
     app.register_error_handler(404, not_found)
 
     csrf.init_app(app)
+
+    db.init_app(app)
     return app
