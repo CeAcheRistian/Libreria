@@ -1,40 +1,41 @@
-from datetime import datetime
+import datetime
 
-from . import db
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 
 class Type_User(db.Model):
-    __tablename__ = 'type_users'
+    __tablename__ = 'type_user'
     id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
-    name = db.Column(db.String(20), nullable=False)
+    type = db.Column(db.String(20), nullable=False)
 
     user = db.relationship("User")
 
 
-class Users(db.Model):
-    __tablename__ = 'users'
+class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     name = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.String(512), nullable=False)
 
     type_user_id = db.Column(db.Integer, db.ForeignKey('type_user.id'))
-    type_user = db.relationship("Type User", back_populates='type_user')
+    type_user = db.relationship("Type_User", back_populates='user')
 
     purchase = db.relationship('Purchase')
 
 
 class Author(db.Model):
-    __tablename__ = 'authors'
+    __tablename__ = 'author'
     id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     last_names = db.Column(db.String(50), nullable=False)
     names = db.Column(db.String(50), nullable=False)
     birth = db.Column(db.Date, nullable=False)
 
-    book = db.relationship("Book", back_populates="books")
+    book = db.relationship("Book", back_populates="author")
 
 
 class Book(db.Model):
-    __tablename__ = 'books'
+    __tablename__ = 'book'
     isbn = db.Column(db.String(12), primary_key=True, nullable=False, unique=True)
     title = db.Column(db.String(100), nullable=False)
     year = db.Column(db.Integer, nullable=False)
@@ -47,13 +48,13 @@ class Book(db.Model):
 
 
 class Purchase(db.Model):
-    __tablename__ = 'purchases'
+    __tablename__ = 'purchase'
     uuid = db.Column(db.String(36), primary_key=True, nullable=False, unique=True)
-    purchased_at = db.Column(db.Datetime, default= datetime.datetime.now())
+    purchased_at = db.Column(db.DateTime, default= datetime.datetime.now())
 
-    book_id = db.Column(db.String(12), db.ForeignKey('book.id'))
-    book = db.relationship('Book', back_populates="books")
+    book_id = db.Column(db.String(12), db.ForeignKey('book.isbn'))
+    book = db.relationship('Book', back_populates="purchase")
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship("User", back_populates="type_user")
+    user = db.relationship("User", back_populates="purchase")
 

@@ -2,14 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for
 
 from flask_wtf.csrf import CSRFProtect
 
-from flask_sqlalchemy import SQLAlchemy
+from .database import *
 
 
 app = Flask(__name__)
 
 csrf = CSRFProtect()
 
-db = SQLAlchemy()
 
 
 @app.route("/")
@@ -32,6 +31,17 @@ def not_found(error):
     return render_template('errors/404.html'), 404
 
 
+def create_user_types():
+
+    admin = Type_User(type='admin')
+
+    user = Type_User(type='user')
+    db.session.add(admin,user)
+
+    db.session.commit()
+
+
+
 def init_app(config):
     app.config.from_object(config)
     app.register_error_handler(404, not_found)
@@ -39,4 +49,7 @@ def init_app(config):
     csrf.init_app(app)
 
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
+        create_user_types()
     return app
