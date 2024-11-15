@@ -2,26 +2,19 @@ import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
-class Type_User(db.Model):
-    __tablename__ = 'type_user'
-    id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
-    type = db.Column(db.String(20), nullable=False)
-
-    user = db.relationship("User")
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'user_list'
     id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     name = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.String(512), nullable=False)
+    type_user = db.Column(db.String(20), nullable=False)
 
-    type_user_id = db.Column(db.Integer, db.ForeignKey('type_user.id'))
-    type_user = db.relationship("Type_User", back_populates='user')
-
-    purchase = db.relationship('Purchase')
+    purchase = db.relationship('Purchase', back_populates='user')
 
 
 class Author(db.Model):
@@ -55,6 +48,6 @@ class Purchase(db.Model):
     book_id = db.Column(db.String(12), db.ForeignKey('book.isbn'))
     book = db.relationship('Book', back_populates="purchase")
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user_list.id'))
     user = db.relationship("User", back_populates="purchase")
 

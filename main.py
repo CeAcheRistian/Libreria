@@ -2,6 +2,7 @@ from app import init_app
 
 from config import config
 
+
 configuration = config['development']
 
 app = init_app(config=configuration)
