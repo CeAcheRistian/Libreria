@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-
+from flask_login import LoginManager, login_user
 from flask_wtf.csrf import CSRFProtect
+
 from werkzeug.exceptions import HTTPException
+
 
 
 from .database import *
@@ -9,6 +11,8 @@ from .database import *
 app = Flask(__name__)
 
 csrf = CSRFProtect()
+
+login_manager_app = LoginManager(app)
 
 
 @app.route("/")
@@ -19,20 +23,28 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        new_user = User(name=request.form['user'], password=request.form['password'], type_user='user')
-        db.session.add(new_user)
-        db.session.commit()
+        if User.query.filter(User.name == request.form['user']).first() == None:
+            new_user = User(name=request.form['user'], password= User.password_encryption(request.form['password']), type_user='user')
+            db.session.add(new_user)
+            db.session.commit()
+        else:
+            return 'Usuario ya existente.'
         return redirect(url_for('login'))
     else:
         return render_template('signup.html')
 
+@login_manager_app.user_loader
+def load_user(id):
+    return User.get_user_by_id(id)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter(User.name == request.form['user']).scalar()
-        if user:
-            if user.type_user == 'admin':
+        logged_user = User.authenticate(request.form['user'], request.form['password'])
+        if logged_user:
+            login_user(logged_user)
+
+            if logged_user.type_user == 'admin':
                 return redirect(url_for('index'))
 
             return redirect(url_for('index'))
@@ -76,7 +88,7 @@ def list_books():
     books = Book.query.all()
     
     for book in books:
-        print(book.title)
+        print(book.author.names)
     return render_template('list_books.html', data=books)
 
 

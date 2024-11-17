@@ -1,13 +1,14 @@
 import datetime
 
 from flask_sqlalchemy import SQLAlchemy
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user_list'
     id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     name = db.Column(db.String(20), nullable=False, unique=True)
@@ -16,6 +17,22 @@ class User(db.Model):
 
     purchase = db.relationship('Purchase', back_populates='user')
 
+    @classmethod
+    def password_encryption(cls, password) -> str:
+        hash = generate_password_hash(password)
+        return hash
+    
+    @classmethod
+    def authenticate(cls, username, password):
+        user = User.query.filter(cls.name == username).first()
+
+        if user and check_password_hash(user.password, password):
+            return user
+
+    @classmethod
+    def get_user_by_id(cls, id):
+        user = User.query.filter(cls.id == id).first()
+        return user
 
 class Author(db.Model):
     __tablename__ = 'author'
