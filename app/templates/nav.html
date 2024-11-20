@@ -19,6 +19,10 @@
                 <a class="nav-link" href="{{ url_for('signup') }}">Crear cuenta</a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('list_books') }}">Biblioteca actual</a>
+            </li>
+
             {% if current_user.type_user == 'admin' %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('list_books') }}">Biblioteca actual</a>

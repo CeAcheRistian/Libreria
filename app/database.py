@@ -1,5 +1,9 @@
 import datetime
 
+import uuid
+
+from sqlalchemy import func
+
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -43,6 +47,10 @@ class Author(db.Model):
 
     book = db.relationship("Book", back_populates="author")
 
+    @classmethod
+    def full_name(cls, names):
+        author = cls.query.filter(cls.names == names).first()
+        return f'{author.names}, {author.last_names}'
 
 class Book(db.Model):
     __tablename__ = 'book'
@@ -56,10 +64,15 @@ class Book(db.Model):
 
     purchase = db.relationship("Purchase")
 
+    @classmethod
+    def books_sold(cls):
+        units = db.session.query(Purchase.book_id, cls.title, cls.price, func.count(Purchase.book_id).label('units_sold')).join(cls, Purchase.book_id == cls.isbn).group_by(Purchase.book_id, cls.title,cls.price).order_by(func.count(Purchase.book_id).desc(), cls.title.asc()).all()
+        return units
+
 
 class Purchase(db.Model):
     __tablename__ = 'purchase'
-    uuid = db.Column(db.String(36), primary_key=True, nullable=False, unique=True)
+    uuid = db.Column(db.String(36), primary_key=True, nullable=False, unique=True, default = uuid.uuid4())
     purchased_at = db.Column(db.DateTime, default= datetime.datetime.now())
 
     book_id = db.Column(db.String(12), db.ForeignKey('book.isbn'))
@@ -68,3 +81,7 @@ class Purchase(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user_list.id'))
     user = db.relationship("User", back_populates="purchase")
 
+    @classmethod
+    def users_purchase(cls, user):
+        user_books = db.session.query(cls.purchased_at, Book.isbn, Book.title).join(cls, cls.book_id == Book.isbn).filter(cls.user_id == user.id).all()
+        return user_books

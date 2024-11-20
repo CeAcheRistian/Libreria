@@ -19,40 +19,41 @@ login_manager_app = LoginManager(app)
 def index():
     if current_user.is_authenticated:
         if current_user.type_user == 'admin':
-            sales = []
+            sales = Book.books_sold()
             data = {
                 'title': 'Libros vendidos',
                 'sales': sales
             }
         else:
-            purchase = []
+            purchases = Purchase.users_purchase(current_user)
             data = {
                 'title': 'Mis compras',
-                'purchase': purchase
+                'purchases': purchases
             }
-
         return render_template('index.html', data=data)
-    else:
 
+    else:
         return redirect(url_for('login'))
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+        try:
+            if User.query.filter(User.name == request.form['user']).first() == None:
+                new_user = User(name=request.form['user'], password=User.password_encryption(
+                    request.form['password']), type_user='user')
 
-        if User.query.filter(User.name == request.form['user']).first() == None:
-            new_user = User(name=request.form['user'], password=User.password_encryption(
-                request.form['password']), type_user='user')
+                db.session.add(new_user)
+                db.session.commit()
 
-            db.session.add(new_user)
-            db.session.commit()
+            else:
+                flash('Usuario ya existente', 'warning')
+                return redirect(url_for('signup'))
 
-        else:
-            flash('Usuario ya existente', 'warning')
-            return redirect(url_for('signup'))
-
-        return redirect(url_for('login'))
+            return redirect(url_for('login'))
+        except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
     else:
         return render_template('signup.html')
 
@@ -65,20 +66,24 @@ def load_user(id):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        logged_user = User.authenticate(
-            request.form['user'], request.form['password'])
-        if logged_user:
-            login_user(logged_user)
-            flash('¡Bienvenido(a) a la Librería ~Para todos los bolsillos~', 'success')
+        try:
+            logged_user = User.authenticate(
+                request.form['user'], request.form['password'])
+            if logged_user:
+                login_user(logged_user)
+                flash('¡Bienvenido(a) a la Librería ~Para todos los bolsillos~', 'success')
 
-            if logged_user.type_user == 'admin':
+                if logged_user.type_user == 'admin':
+                    return redirect(url_for('index'))
+
                 return redirect(url_for('index'))
 
-            return redirect(url_for('index'))
+            else:
+                flash('Usuario o Password incorrectos.', 'warning')
+                return render_template('auth/login.html')
 
-        else:
-            flash('Usuario o Password incorrectos.', 'warning')
-            return render_template('auth/login.html')
+        except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
     else:
         return render_template('auth/login.html')
 
@@ -96,29 +101,31 @@ def logout():
 @login_required
 def new_book():
     if request.method == 'POST':
+        try:
+            if request.form['names'] != '':
+                author = Author(
+                    names=request.form['names'],
+                    last_names=request.form['last_names'],
+                    birth=request.form['birth']
+                )
+                db.session.add(author)
+                db.session.commit()
 
-        if request.form['names'] != '':
-            author = Author(
-                names=request.form['names'],
-                last_names=request.form['last_names'],
-                birth=request.form['birth']
-            )
-            db.session.add(author)
-            db.session.commit()
+            if request.form['isbn'] != '':
+                new_book = Book(
+                    isbn=request.form['isbn'],
+                    title=request.form['title'],
+                    year=request.form['year'],
+                    price=request.form['price'],
+                    author_id=request.form['author_id']
+                )
+                db.session.add(new_book)
+                db.session.commit()
 
-        if request.form['isbn'] != '':
-            new_book = Book(
-                isbn=request.form['isbn'],
-                title=request.form['title'],
-                year=request.form['year'],
-                price=request.form['price'],
-                author_id=request.form['author_id']
-            )
-            db.session.add(new_book)
-            db.session.commit()
-
-        return render_template('new_book.html')
-
+            return render_template('new_book.html')
+        
+        except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
     else:
         return render_template('new_book.html')
 
@@ -127,9 +134,9 @@ def new_book():
 @login_required
 def update_book():
     if request.method == 'POST':
-        book = Book.query.filter(Book.isbn == request.form['isbn']).first()
-
         try:
+            book = Book.query.filter(Book.isbn == request.form['isbn']).first()
+
             if book:
                 book.isbn = request.form['isbn'],
                 book.title = request.form['title'],
@@ -144,9 +151,8 @@ def update_book():
                 flash('Libro no encontrado', 'warning')
                 return redirect(url_for('update_book'))
 
-        except Exception as e:
-            print(e)
-            flash('No se pudo actualizar el libro', 'warning')
+        except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
 
         return render_template('update_book.html')
     else:
@@ -157,25 +163,59 @@ def update_book():
 @login_required
 def delete_book():
     if request.method == 'POST':
-        book = Book.query.filter(Book.isbn == request.form['isbn']).first()
+        try:
+            book = Book.query.filter(Book.isbn == request.form['isbn']).first()
 
-        if book:
-            db.session.delete(book)
-            db.session.commit()
-            flash('libro eliminado', 'success')
-        else:
-            flash('libro no encontrado', 'warning')
+            if book:
+                db.session.delete(book)
+                db.session.commit()
+                flash('libro eliminado', 'success')
+            else:
+                flash('libro no encontrado', 'warning')
 
-        return render_template('delete_book.html')
+            return render_template('delete_book.html')
+        except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
     else:
         return render_template('delete_book.html')
 
 @app.route('/list_books')
 @login_required
 def list_books():
-    books = Book.query.all()
+    try:
+        books = Book.query.all()
 
-    return render_template('list_books.html', data=books)
+        data = {
+            'title': 'Listado de libros',
+            'books': books
+        }
+        return render_template('list_books.html', data=data)
+    except Exception as ex:
+            return render_template('errors/error.html', message=format(ex))
+    
+
+@app.route('/purchase_book', methods=['POST'])
+@login_required
+def purchase_book():
+    data_request = request.get_json()
+    data = {}
+    try:
+        purchase = Purchase(
+            book_id = data_request['isbn'],
+            user_id = current_user.id
+        )
+        db.session.add(purchase)
+        db.session.commit()
+        data['success'] = True
+    except Exception as ex:
+        data['success'] = False
+        raise ex
+        data['message'] = f'{ex}'
+    finally:
+        print('\n', data['success'])
+        db.session.close()
+
+    return jsonify(data)
 
 
 def not_found(error):
