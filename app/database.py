@@ -66,13 +66,13 @@ class Book(db.Model):
 
     @classmethod
     def books_sold(cls):
-        units = db.session.query(Purchase.book_id, cls.title, cls.price, func.count(Purchase.book_id).label('units_sold')).join(cls, Purchase.book_id == cls.isbn).group_by(Purchase.book_id, cls.title,cls.price).order_by(func.count(Purchase.book_id).desc(), cls.title.asc()).all()
+        units = db.session.query(Purchase.book_id, cls.title, cls.price, func.count(Purchase.book_id).label('units_sold')).join(cls, Purchase.book_id == cls.isbn).all()#.group_by(Purchase.book_id, cls.title,cls.price).order_by(func.count(Purchase.book_id).desc(), cls.title.asc())
         return units
 
 
 class Purchase(db.Model):
     __tablename__ = 'purchase'
-    uuid = db.Column(db.String(36), primary_key=True, nullable=False, unique=True, default = uuid.uuid4())
+    uuid = db.Column(db.String(36), primary_key=True, nullable=False, unique=True)
     purchased_at = db.Column(db.DateTime, default= datetime.datetime.now())
 
     book_id = db.Column(db.String(12), db.ForeignKey('book.isbn'))

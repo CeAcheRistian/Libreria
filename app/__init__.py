@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
+from flask_mail import Mail
 
-from werkzeug.exceptions import HTTPException
-
+import uuid
 
 from .database import *
+
+from .email import purchase_confirmation
+
 
 app = Flask(__name__)
 
@@ -13,6 +16,7 @@ csrf = CSRFProtect()
 
 login_manager_app = LoginManager(app)
 
+mail = Mail()
 
 @app.route("/")
 @login_required
@@ -201,19 +205,20 @@ def purchase_book():
     data = {}
     try:
         purchase = Purchase(
+            uuid = uuid.uuid4(),
             book_id = data_request['isbn'],
             user_id = current_user.id
         )
         db.session.add(purchase)
         db.session.commit()
+
         data['success'] = True
+
+        purchase_confirmation(app, mail, current_user, purchase)
     except Exception as ex:
         data['success'] = False
-        raise ex
         data['message'] = f'{ex}'
-    finally:
-        print('\n', data['success'])
-        db.session.close()
+        raise ex
 
     return jsonify(data)
 
@@ -239,5 +244,7 @@ def init_app(config):
 
     with app.app_context():
         db.create_all()
+
+    mail.init_app(app)
 
     return app
