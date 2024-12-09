@@ -1,0 +1,52 @@
+{% extends './base.html' %}
+
+{% block title %}
+Crea tu cuenta
+{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+{% endblock %}
+
+{% block body %}
+<form class="form-signin" action="/signup" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <img class="mb-4" src="{{ url_for('static', filename='img/flask.svg')}}" alt="" width="72" height="57">
+    <h1 class="h3 mb-3 fw-normal">Crea tu cuenta</h1>
+
+    <div class="form-floating">
+        <input type="text" name="user" class="form-control" id="user" placeholder="Usuario" minlength="5" maxlength="20" required autofocus>
+        <div style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"
+            data-lastpass-icon-root=""></div>
+    </div>
+    <br>
+    <div class="form-floating">
+        <input type="password" name="password" class="form-control" id="password" placeholder="Contrase&nacute;a" minlength="6" maxlength="20" required>
+        <div style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"
+            data-lastpass-icon-root=""></div>
+    </div>
+    <br>
+    <button class="btn btn-primary w-100 py-2" type="submit">Ingresar</button>
+
+    {% with messages = get_flashed_messages(with_categories = True) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <br></br>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong style="font-size: 14px;"> {{ message }} </strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <p class="mt-5 mb-3 text-body-secondary">2024</p>
+</form>
+
+{% block customJS %}
+<script src="{{ url_for('static', filename='js/login.js')}}"></script>
+{% endblock %}
+
+{% endblock %}

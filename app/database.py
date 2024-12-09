@@ -66,9 +66,14 @@ class Book(db.Model):
 
     @classmethod
     def books_sold(cls):
-        units = db.session.query(Purchase.book_id, cls.title, cls.price, func.count(Purchase.book_id).label('units_sold')).join(cls, Purchase.book_id == cls.isbn).all()#.group_by(Purchase.book_id, cls.title,cls.price).order_by(func.count(Purchase.book_id).desc(), cls.title.asc())
+        units = db.session.query(Purchase.book_id, cls.title, cls.price, func.count(Purchase.book_id).label('units_sold')).join(cls, Purchase.book_id == cls.isbn).group_by(Purchase.book_id, cls.title,cls.price).order_by(func.count(Purchase.book_id).desc(), cls.title.asc()).all()
+
         return units
 
+    @classmethod
+    def seek_book(cls, isbn):
+        book = cls.query.filter(cls.isbn == isbn).first()
+        return book
 
 class Purchase(db.Model):
     __tablename__ = 'purchase'

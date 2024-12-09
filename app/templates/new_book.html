@@ -1,0 +1,83 @@
+{% extends './body.html' %}
+
+{% block title %}
+Ingreso de libros
+{% endblock %}
+
+{% block container %}
+<form class="form-signin" action="/new_book" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="container">
+        <div class="py-5 text-center">
+            <h2>Añade un nuevo libro</h2>
+            <p class="lead">LLena los campos para ingresar un nuevo autor y/o un nuevo libro.</p>
+        </div>
+
+        <div class="container">
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <h4 class="mb-3">Datos del autor</h4>
+                <form class="">
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label for="names">Nombres</label>
+                            <input type="text" name='names' class="form-control" id="names" maxlength="50">
+                            <div style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"
+                                data-lastpass-icon-root=""></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="last_names">Apellidos</label>
+                            <input type="text" class="form-control" name='last_names' id="last_names" maxlength="50">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="birth">Fecha de Nacimiento</label>
+                            <input type="text" class="form-control" name='birth' id="birth" placeholder="yyyy-mm-dd"
+                                maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4 class="mb-3">Datos del libro</h4>
+                        <label for="isbn">ISBN</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name='isbn' id="isbn" placeholder="" maxlength="12">
+                            <div style="position: relative !important; height: 0px !important; width: 0px !important; float: left !important;"
+                                data-lastpass-icon-root=""></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="title">T&iacute;tulo</label>
+                        <input type="text" class="form-control" name='title' id="title" maxlength="100">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="year">A&ntilde;o</label>
+                        <input type="text" class="form-control" name='year' id="year" placeholder="yyyy">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="price">Precio<span class="text-muted"> (sin signos)</span></label>
+                        <input type="text" class="form-control" name='price' id="price">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="author_id">Id del autor</label>
+                        <input type="text" name='author_id'class="form-control" id="author_id">
+                    </div>
+
+                    <hr class="mb-4">
+                    <button class="btn btn-primary btn-lg btn-block" type="submit">Ingresar datos</button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="my-5 pt-5 text-muted text-center text-small">
+            <p class="mb-1">2024 - <em>Para todos los bolsillos</em></p>
+        </footer>
+    </div>
+</form>
+
+{% endblock %}

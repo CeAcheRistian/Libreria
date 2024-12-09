@@ -9,21 +9,20 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+
+            {% if current_user.type_user == 'user' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('list_books') }}">Libros</a>
             </li>
+            {% endif %}
+
+            {% if current_user.type_user == 'admin' %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('login') }}">Login</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('signup') }}">Crear cuenta</a>
             </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('list_books') }}">Biblioteca actual</a>
-            </li>
-
-            {% if current_user.type_user == 'admin' %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('list_books') }}">Biblioteca actual</a>
             </li>

@@ -3,6 +3,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 
+from oauthlib.oauth2 import WebApplicationClient
+
 import uuid
 
 from .database import *
@@ -17,6 +19,19 @@ csrf = CSRFProtect()
 login_manager_app = LoginManager(app)
 
 mail = Mail()
+
+client_id = 'xxxxx'
+client = WebApplicationClient(client_id)
+
+authorization_url = 'https://127.0.0.1:5000/login'
+
+url = client.prepare_request_uri(
+    authorization_url,
+    redirect_uri='https://127.0.0.1:5000',
+    scope= ['read:user'],
+    state= 'D8VAo311AAl_49LAtM51HA'
+)
+
 
 @app.route("/")
 @login_required
@@ -205,7 +220,7 @@ def purchase_book():
     data = {}
     try:
         purchase = Purchase(
-            uuid = uuid.uuid4(),
+            uuid = str(uuid.uuid4()),
             book_id = data_request['isbn'],
             user_id = current_user.id
         )
@@ -214,7 +229,7 @@ def purchase_book():
 
         data['success'] = True
 
-        purchase_confirmation(app, mail, current_user, purchase)
+        purchase_confirmation(app, mail, current_user, Book.seek_book(purchase.book_id))
     except Exception as ex:
         data['success'] = False
         data['message'] = f'{ex}'
